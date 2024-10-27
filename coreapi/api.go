@@ -1,16 +1,14 @@
-package midtrans
+package coreapi
 
 import (
+	"github.com/SyaibanAhmadRamadhan/go-midtrans-sdk"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-resty/resty/v2"
-	"go.opentelemetry.io/otel"
 	"net/http"
 	"os"
 	"time"
 )
-
-var otelTracer = otel.Tracer("github.com/SyaibanAhmadRamadhan/go-midtrans-sdk")
 
 type optApiFunc func(*api)
 
@@ -36,6 +34,7 @@ func ProductionLive() optApiFunc {
 func WithOtel() optApiFunc {
 	return func(api *api) {
 		api.usingOtel = true
+		api.tracing = midtrans.NewOtelTracing()
 	}
 }
 
@@ -45,13 +44,13 @@ type api struct {
 	baseURI     string
 	serverKey   string
 	restyClient *resty.Client
-
+	tracing     midtrans.Tracing
 	// config
 	usingOtel bool
 }
 
 func NewAPI(opts ...optApiFunc) *api {
-	v, t := NewValidator()
+	v, t := midtrans.NewValidator()
 	a := &api{
 		v:         v,
 		trans:     t,
@@ -64,6 +63,11 @@ func NewAPI(opts ...optApiFunc) *api {
 
 	for _, opt := range opts {
 		opt(a)
+	}
+
+	if a.tracing == nil {
+		a.tracing = midtrans.NewOtelTracing()
+		a.usingOtel = true
 	}
 	return a
 }

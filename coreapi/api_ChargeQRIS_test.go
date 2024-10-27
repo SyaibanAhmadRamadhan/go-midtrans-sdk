@@ -1,4 +1,4 @@
-package midtrans_test
+package coreapi_test
 
 import (
 	"fmt"
