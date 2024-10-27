@@ -1,0 +1,9 @@
+.idea
+.vscode
+.DS_Store
+
+vendor/
+
+# golang air
+.air.toml
+tmp
