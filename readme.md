@@ -21,5 +21,5 @@ For examples or references, you can check the http library that I have created h
 Use `go get` to install the SDK into your Go project:
 
 ```shell
-go get github.com/SyaibanAhmadRamadhan/go-midtrans-sdk@v1.241028.2219
+go get github.com/SyaibanAhmadRamadhan/go-midtrans-sdk@v1.241028.2233
 ```

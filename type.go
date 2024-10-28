@@ -126,6 +126,12 @@ type GoPayResponse struct {
 	ChannelResponseMessage string           `json:"channel_response_message"`
 	Currency               string           `json:"currency"`
 	SignatureKey           string           `json:"signature_key"`
+
+	// fill by code
+	ActionGenerateQRCode   ActionResponse `json:"-"`
+	ActionDeepLinkRedirect ActionResponse `json:"-"`
+	ActionGetStatus        ActionResponse `json:"-"`
+	ActionCancel           ActionResponse `json:"-"`
 }
 
 // CREDIT CARD
@@ -160,6 +166,8 @@ type ShopeePayResponse struct {
 	TransactionStatus      string           `json:"transaction_status"`
 	FraudStatus            string           `json:"fraud_status"`
 	Actions                []ActionResponse `json:"actions"`
+
+	ActionDeepLinkRedirect ActionResponse `json:"-"`
 }
 
 // QRIS
@@ -181,6 +189,9 @@ type ChargeQRISResponse struct {
 	FraudStatus       string           `json:"fraud_status"`
 	Acquirer          string           `json:"acquirer"`
 	Actions           []ActionResponse `json:"actions"`
+
+	// fill by code
+	ActionGenerateQRCode ActionResponse `json:"-"`
 }
 
 // VIRTUAL ACCOUNT
