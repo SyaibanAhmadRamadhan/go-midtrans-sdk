@@ -7,27 +7,23 @@ import (
 	"github.com/SyaibanAhmadRamadhan/go-midtrans-sdk"
 )
 
-// ChargeQRIS
-// list error type: ErrMarshaller, ErrApiCall, ErrDuplicateOrderID, ErrRateLimitExceeded
-func (a *api) ChargeQRIS(ctx context.Context, input ChargeQRISInput) (output ChargeQRISOutput, err error) {
+func (a *api) ChargeShopeePay(ctx context.Context, input ChargeShopeePayInput) (output ChargeShopeePayOutput, err error) {
 	if a.usingOtel {
 		if input.MetaData == nil {
 			input.MetaData = make(map[string]string, 1)
 		}
 		input.MetaData["transparent"] = midtrans.GetTraceParent(ctx, a.traceParentKey)
 	}
-	ctx = a.tracing.StartTrace(ctx, "ChargeQRIS")
+	ctx = a.tracing.StartTrace(ctx, "ChargeGoPay")
 
 	req := midtrans.ChargeRequest{
-		PaymentType:       "qris",
+		PaymentType:       "gopay",
 		TransactionDetail: input.TransactionDetail,
 		CustomExpiry:      input.CustomExpiry,
 		ItemDetails:       input.ItemDetails,
 		CustomerDetail:    input.CustomerDetail,
 		MetaData:          input.MetaData,
-		QRIS: &midtrans.QRIS{
-			Acquirer: input.Acquirer,
-		},
+		ShopeePay:         input.ShopeePay,
 	}
 
 	err = a.v.Struct(req)
@@ -53,23 +49,22 @@ func (a *api) ChargeQRIS(ctx context.Context, input ChargeQRISInput) (output Cha
 		a.tracing.EndTrace(ctx, err, "HTTP request failed")
 		return output, fmt.Errorf("%w:%w", midtrans.ErrApiCall, err)
 	}
-
 	a.tracing.SetRestyTraceInfo(ctx, resp)
 
 	output.ErrorBadReqResponse, err = a.catchResponse(ctx, resp, &output.ResponseSuccess)
 	return
 }
 
-type ChargeQRISInput struct {
+type ChargeShopeePayInput struct {
 	TransactionDetail midtrans.TransactionDetail
 	ItemDetails       []midtrans.ItemDetail
-	Acquirer          string
 	CustomerDetail    *midtrans.CustomerDetail
 	CustomExpiry      *midtrans.CustomExpiry
 	MetaData          map[string]string
+	ShopeePay         *midtrans.ShopeePay
 }
 
-type ChargeQRISOutput struct {
+type ChargeShopeePayOutput struct {
 	ErrorBadReqResponse *midtrans.ErrorBadReqResponse
-	ResponseSuccess     midtrans.ChargeQRISResponse
+	ResponseSuccess     midtrans.ShopeePayResponse
 }
