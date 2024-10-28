@@ -1,18 +1,25 @@
 package midtrans
 
-import "time"
+type TransactionStatus string
+
+var (
+	TransactionStatusSettlement TransactionStatus = "settlement"
+	TransactionStatusExpired    TransactionStatus = "expire"
+	TransactionStatusPending    TransactionStatus = "pending"
+)
 
 type ChargeRequest struct {
 	PaymentType       string            `json:"payment_type" validate:"required"`
 	TransactionDetail TransactionDetail `json:"transaction_details" validate:"required"`
-	CustomExpiry      *CustomExpiry     `json:"custom_expiry,omitempty"`
+	CustomExpiry      *CustomExpiry     `json:"custom_expiry,omitempty" validate:"omitempty"`
 	ItemDetails       []ItemDetail      `json:"item_details,omitempty" validate:"omitempty,dive"`
-	CustomerDetail    *CustomerDetail   `json:"customer_details,omitempty"`
-	SellerDetail      *SellerDetail     `json:"seller_details,omitempty"`
-	GoPay             *GoPay            `json:"gopay,omitempty"`
-	CreditCard        *CreditCard       `json:"credit_card,omitempty"`
+	CustomerDetail    *CustomerDetail   `json:"customer_details,omitempty" validate:"omitempty"`
+	SellerDetail      *SellerDetail     `json:"seller_details,omitempty" validate:"omitempty"`
+	GoPay             *GoPay            `json:"gopay,omitempty" validate:"omitempty"`
+	CreditCard        *CreditCard       `json:"credit_card,omitempty" validate:"omitempty"`
 	MetaData          map[string]string `json:"meta_data,omitempty"`
-	QRIS              *QRIS             `json:"qris,omitempty"`
+	QRIS              *QRIS             `json:"qris,omitempty" validate:"omitempty"`
+	ShopeePay         *ShopeePay        `json:"shopee_pay,omitempty" validate:"omitempty"`
 }
 
 // CUSTOMER DETAIL
@@ -70,9 +77,9 @@ type TransactionDetail struct {
 // CUSTOM EXPIRY
 // REF https://docs.midtrans.com/reference/custom-expiry-object
 type CustomExpiry struct {
-	OrderTime      time.Time `json:"order_time,omitempty"`
-	ExpiryDuration int32     `json:"expiry_duration,omitempty"`
-	Unit           string    `json:"unit,omitempty"`
+	//OrderTime      time.Time `json:"order_time,omitempty"`
+	ExpiryDuration int32  `json:"expiry_duration,omitempty"`
+	Unit           string `json:"unit,omitempty"`
 }
 
 // SELLER DETAIL
@@ -105,6 +112,21 @@ type GoPay struct {
 	Recurring          bool     `json:"recurring,omitempty" validate:"omitempty"`
 	PromotionIDs       []string `json:"promotion_ids,omitempty" validate:"omitempty,dive,required"`
 }
+type GoPayResponse struct {
+	StatusCode             string           `json:"status_code"`
+	StatusMessage          string           `json:"status_message"`
+	TransactionID          string           `json:"transaction_id"`
+	OrderID                string           `json:"order_id"`
+	GrossAmount            string           `json:"gross_amount"`
+	PaymentType            string           `json:"payment_type"`
+	TransactionTime        string           `json:"transaction_time"`
+	TransactionStatus      string           `json:"transaction_status"`
+	Actions                []ActionResponse `json:"actions"`
+	ChannelResponseCode    string           `json:"channel_response_code"`
+	ChannelResponseMessage string           `json:"channel_response_message"`
+	Currency               string           `json:"currency"`
+	SignatureKey           string           `json:"signature_key"`
+}
 
 // CREDIT CARD
 // REF https://docs.midtrans.com/reference/credit-card-object
@@ -122,6 +144,22 @@ type CreditCard struct {
 // REF https://docs.midtrans.com/reference/shopeepay-object
 type ShopeePay struct {
 	CallbackURL string `json:"callback_url,omitempty" validate:"omitempty,url"`
+}
+type ShopeePayResponse struct {
+	StatusCode             string           `json:"status_code"`
+	StatusMessage          string           `json:"status_message"`
+	ChannelResponseCode    string           `json:"channel_response_code"`
+	ChannelResponseMessage string           `json:"channel_response_message"`
+	TransactionID          string           `json:"transaction_id"`
+	OrderID                string           `json:"order_id"`
+	MerchantID             string           `json:"merchant_id"`
+	GrossAmount            string           `json:"gross_amount"`
+	Currency               string           `json:"currency"`
+	PaymentType            string           `json:"payment_type"`
+	TransactionTime        string           `json:"transaction_time"`
+	TransactionStatus      string           `json:"transaction_status"`
+	FraudStatus            string           `json:"fraud_status"`
+	Actions                []ActionResponse `json:"actions"`
 }
 
 // QRIS
@@ -184,19 +222,16 @@ type EChannel struct {
 }
 
 type ActionResponse struct {
-	Name   string `json:"name"`
-	Method string `json:"method"`
-	URL    string `json:"url"`
+	Name   string   `json:"name"`
+	Method string   `json:"method"`
+	URL    string   `json:"url"`
+	Fields []string `json:"fields,omitempty"`
 }
 
-type Error400Response struct {
+type ErrorBadReqResponse struct {
+	HttpStatus         int      `json:"-"`
 	StatusCode         string   `json:"status_code"`
 	StatusMessage      string   `json:"status_message"`
-	ValidationMessages []string `json:"validation_messages"`
-	ID                 string   `json:"id"`
-}
-
-type Error401Response struct {
-	StatusCode    string `json:"status_code"`
-	StatusMessage string `json:"status_message"`
+	ValidationMessages []string `json:"validation_messages,omitempty"`
+	ID                 string   `json:"id,omitempty"`
 }

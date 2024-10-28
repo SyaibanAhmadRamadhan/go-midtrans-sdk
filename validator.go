@@ -15,7 +15,7 @@ func NewValidator() (*validator.Validate, ut.Translator) {
 		f := field.Tag.Get("json")
 		fsplit := strings.Split(f, ",")
 		if len(fsplit) == 2 {
-			return fsplit[1]
+			return fsplit[0]
 		}
 		return f
 	})
