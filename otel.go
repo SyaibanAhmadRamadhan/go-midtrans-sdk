@@ -43,6 +43,9 @@ func (o *otelTracing) SetRestyTraceInfo(ctx context.Context, resp *resty.Respons
 		attribute.String("conn_idle_time", ti.ConnIdleTime.String()),
 		attribute.Int("request_attempt", ti.RequestAttempt),
 		attribute.String("remote_addr", ti.RemoteAddr.String()),
+		semconv.HTTPResponseStatusCode(resp.StatusCode()),
+		semconv.HTTPResponseBodySize(len(resp.Body())),
+		attribute.String("http.response.body", string(resp.Body())),
 	)
 }
 func (o *otelTracing) EndTrace(ctx context.Context, err error, msg string) {
@@ -59,15 +62,4 @@ func (o *otelTracing) EndTrace(ctx context.Context, err error, msg string) {
 	}
 
 	span.End()
-}
-
-func (o *otelTracing) SetRespBody(ctx context.Context, resp *resty.Response) {
-	span := trace.SpanFromContext(ctx)
-	if !span.IsRecording() {
-		return
-	}
-
-	span.SetAttributes(attribute.String(
-		"resp.body", string(resp.Body())),
-	)
 }
