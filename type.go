@@ -19,7 +19,7 @@ type ChargeRequest struct {
 	CreditCard        *CreditCard       `json:"credit_card,omitempty" validate:"omitempty"`
 	MetaData          map[string]string `json:"meta_data,omitempty"`
 	QRIS              *QRIS             `json:"qris,omitempty" validate:"omitempty"`
-	ShopeePay         *ShopeePay        `json:"shopee_pay,omitempty" validate:"omitempty"`
+	ShopeePay         *ShopeePay        `json:"shopeepay,omitempty" validate:"omitempty"`
 }
 
 // CUSTOMER DETAIL
@@ -126,6 +126,12 @@ type GoPayResponse struct {
 	ChannelResponseMessage string           `json:"channel_response_message"`
 	Currency               string           `json:"currency"`
 	SignatureKey           string           `json:"signature_key"`
+
+	// fill by code
+	ActionGenerateQRCode   ActionResponse `json:"-"`
+	ActionDeepLinkRedirect ActionResponse `json:"-"`
+	ActionGetStatus        ActionResponse `json:"-"`
+	ActionCancel           ActionResponse `json:"-"`
 }
 
 // CREDIT CARD
@@ -143,7 +149,7 @@ type CreditCard struct {
 // SHOPEEPAY
 // REF https://docs.midtrans.com/reference/shopeepay-object
 type ShopeePay struct {
-	CallbackURL string `json:"callback_url,omitempty" validate:"omitempty,url"`
+	CallbackURL string `json:"callback_url" validate:"required,url"`
 }
 type ShopeePayResponse struct {
 	StatusCode             string           `json:"status_code"`
@@ -160,6 +166,8 @@ type ShopeePayResponse struct {
 	TransactionStatus      string           `json:"transaction_status"`
 	FraudStatus            string           `json:"fraud_status"`
 	Actions                []ActionResponse `json:"actions"`
+
+	ActionDeepLinkRedirect ActionResponse `json:"-"`
 }
 
 // QRIS
@@ -181,6 +189,9 @@ type ChargeQRISResponse struct {
 	FraudStatus       string           `json:"fraud_status"`
 	Acquirer          string           `json:"acquirer"`
 	Actions           []ActionResponse `json:"actions"`
+
+	// fill by code
+	ActionGenerateQRCode ActionResponse `json:"-"`
 }
 
 // VIRTUAL ACCOUNT

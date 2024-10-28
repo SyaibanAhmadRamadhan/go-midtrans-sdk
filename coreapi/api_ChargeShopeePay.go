@@ -17,7 +17,7 @@ func (a *api) ChargeShopeePay(ctx context.Context, input ChargeShopeePayInput) (
 	ctx = a.tracing.StartTrace(ctx, "ChargeGoPay")
 
 	req := midtrans.ChargeRequest{
-		PaymentType:       "gopay",
+		PaymentType:       "shopeepay",
 		TransactionDetail: input.TransactionDetail,
 		CustomExpiry:      input.CustomExpiry,
 		ItemDetails:       input.ItemDetails,
@@ -52,6 +52,17 @@ func (a *api) ChargeShopeePay(ctx context.Context, input ChargeShopeePayInput) (
 	a.tracing.SetRestyTraceInfo(ctx, resp)
 
 	output.ErrorBadReqResponse, err = a.catchResponse(ctx, resp, &output.ResponseSuccess)
+	if err != nil {
+		return output, err
+	}
+	if output.ErrorBadReqResponse == nil {
+		for _, actionResp := range output.ResponseSuccess.Actions {
+			switch actionResp.Name {
+			case "deeplink-redirect":
+				output.ResponseSuccess.ActionDeepLinkRedirect = actionResp
+			}
+		}
+	}
 	return
 }
 

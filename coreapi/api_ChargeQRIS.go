@@ -57,6 +57,17 @@ func (a *api) ChargeQRIS(ctx context.Context, input ChargeQRISInput) (output Cha
 	a.tracing.SetRestyTraceInfo(ctx, resp)
 
 	output.ErrorBadReqResponse, err = a.catchResponse(ctx, resp, &output.ResponseSuccess)
+	if err != nil {
+		return output, err
+	}
+
+	if output.ErrorBadReqResponse == nil {
+		for _, actionResp := range output.ResponseSuccess.Actions {
+			if actionResp.Name == "generate-qr-code" {
+				output.ResponseSuccess.ActionGenerateQRCode = actionResp
+			}
+		}
+	}
 	return
 }
 

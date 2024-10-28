@@ -52,6 +52,24 @@ func (a *api) ChargeGoPay(ctx context.Context, input ChargeGoPayInput) (output C
 	a.tracing.SetRestyTraceInfo(ctx, resp)
 
 	output.ErrorBadReqResponse, err = a.catchResponse(ctx, resp, &output.ResponseSuccess)
+	if err != nil {
+		return output, err
+	}
+	if output.ErrorBadReqResponse == nil {
+		for _, actionResp := range output.ResponseSuccess.Actions {
+			switch actionResp.Name {
+			case "generate-qr-code":
+				output.ResponseSuccess.ActionGenerateQRCode = actionResp
+			case "deeplink-redirect":
+				output.ResponseSuccess.ActionDeepLinkRedirect = actionResp
+			case "get-status":
+				output.ResponseSuccess.ActionGetStatus = actionResp
+			case "cancel":
+				output.ResponseSuccess.ActionCancel = actionResp
+			}
+		}
+	}
+
 	return
 }
 
