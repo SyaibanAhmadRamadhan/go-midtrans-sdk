@@ -1,4 +1,4 @@
-package coreapi
+package coreapi_midtrans
 
 import (
 	"github.com/SyaibanAhmadRamadhan/go-midtrans-sdk"
@@ -31,6 +31,12 @@ func ProductionLive() optApiFunc {
 	}
 }
 
+func WithTraceParentKey(k string) optApiFunc {
+	return func(api *api) {
+		api.traceParentKey = k
+	}
+}
+
 func WithOtel() optApiFunc {
 	return func(api *api) {
 		api.usingOtel = true
@@ -39,12 +45,13 @@ func WithOtel() optApiFunc {
 }
 
 type api struct {
-	v           *validator.Validate
-	trans       ut.Translator
-	baseURI     string
-	serverKey   string
-	restyClient *resty.Client
-	tracing     midtrans.Tracing
+	v              *validator.Validate
+	trans          ut.Translator
+	baseURI        string
+	serverKey      string
+	restyClient    *resty.Client
+	tracing        midtrans.Tracing
+	traceParentKey string
 	// config
 	usingOtel bool
 }
@@ -52,12 +59,13 @@ type api struct {
 func NewAPI(opts ...optApiFunc) *api {
 	v, t := midtrans.NewValidator()
 	a := &api{
-		v:         v,
-		trans:     t,
-		baseURI:   "https://api.sandbox.midtrans.com",
-		serverKey: os.Getenv("MIDTRANS_API_KEY"),
+		v:              v,
+		trans:          t,
+		traceParentKey: "transparent",
+		baseURI:        "https://api.sandbox.midtrans.com",
+		serverKey:      os.Getenv("MIDTRANS_API_KEY"),
 		restyClient: resty.New().AddRetryCondition(func(response *resty.Response, err error) bool {
-			return response.StatusCode() <= 500 || response.StatusCode() == http.StatusTooManyRequests
+			return response.StatusCode() >= 500 || response.StatusCode() == http.StatusTooManyRequests
 		}),
 	}
 
